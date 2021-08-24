@@ -16,23 +16,30 @@ def _get_client():
         _client = Spot(base_url=config.BASE_URL, key=config.API_KEY, secret=config.API_SECRET)
     return _client
 
-def _get_sym_for_quote_asset(quote_asset):
-    result = []
+def _spot_api_call(api, **args):
     try:
-        symbols = _get_client().exchange_info()["symbols"]
-        for symbol in symbols:
-            if symbol["quoteAsset"] == quote_asset:
-                result.append(symbol["symbol"])
-        return result, None
+        return api(**args), None
     except binance.error.ClientError as err:
         logging.error(err)
-        return [], "ClientError"
+        return None, "ClientError"
     except binance.error.ServerError as err:
         logging.error(err)
-        return [], "ServerError"
+        return None, "ServerError"
     except Exception as err:
         logging.error(err)
-        return [], "Error"
+        return None, "Error"
+
+def _get_sym_for_quote_asset(quote_asset):
+    _res, _err = _spot_api_call(_get_client().exchange_info)
+    if _err is not None:
+        logging.error("Got error while _get_sym_for_quote_asset", _err)
+        return []
+    symbols = _res["symbols"]
+    result = []
+    for symbol in symbols:
+        if symbol["quoteAsset"] == quote_asset:
+            result.append(symbol["symbol"])
+    return result
 
 def _get_total_value(trades):
     total = 0.0
@@ -120,6 +127,7 @@ def get_price_spread(symbols):
 
 # pp.pprint(highest_vol_quote_asset_symbols())
 # pp.pprint(highest_trades_quote_asset_symbols())
-symbols = _get_sym_for_quote_asset("BTC")[0]
-pp.pprint(get_notaional_value_of_bids_and_asks(symbols))
-pp.pprint(get_price_spread(symbols))
+symbols = _get_sym_for_quote_asset("BTC")
+pp.pprint(symbols)
+# pp.pprint(get_notaional_value_of_bids_and_asks(symbols))
+# pp.pprint(get_price_spread(symbols))
