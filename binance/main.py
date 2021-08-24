@@ -12,6 +12,12 @@ args = vars(parser.parse_args())
 
 
 def export_metrics(symbols):
+    """Exports prometheus metrics for each 'symbols' spread and delta
+    Metrics can be consumed at http://<hostname>:<config.METRICS_SERVER_PORT>/metrics
+    Parameters
+    ----------
+    symbols : list
+    """
     spread_metrics, delta_metrics = {}, {}
     for symbol in symbols:
         spread_metrics[symbol] = Gauge(f"spread_{symbol}", f"Spread for {symbol}")
