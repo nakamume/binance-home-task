@@ -11,5 +11,6 @@ WORKDIR /srv
 COPY poetry.lock pyproject.toml /srv/
 RUN poetry install
 COPY binance/ /srv/
+EXPOSE 8080
 ENTRYPOINT ["poetry", "run", "python", "main.py"]
 CMD ["--data", "q1"]
